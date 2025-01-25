@@ -94,4 +94,13 @@ public class EndMenu : MonoBehaviour
             gameManager.OnWin -= OnWinEvent; // Se désabonner de l'événement OnWin
         }
     }
+
+    public void QuitApplication()
+    {
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#else
+        Application.Quit();
+#endif
+    }
 }
