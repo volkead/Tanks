@@ -1,14 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
+using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 
 public class TankBehavior : MonoBehaviour
 {
     // Enumération des joueurs
     public EPlayer playerID;
-
     #region Variables et paramètres
 
     [Header("Stats")]
@@ -24,11 +23,12 @@ public class TankBehavior : MonoBehaviour
     [SerializeField] private Transform minePos;
 
     [Header("Mouvement")]
-    [SerializeField] private float speed = 5f;
+    [SerializeField] private float baseSpeed = 5f;
     [SerializeField] private float angularSpeed = 120f;
 
     [Header("Paramètres de tir")]
     [SerializeField] private float maxShootPower = 3000f;
+    [SerializeField] private float chargeTimeToMax = 3f; // Temps pour atteindre la puissance maximale
     private float shootHoldTime = 0f;
 
     [Header("Sons du moteur")]
@@ -57,14 +57,36 @@ public class TankBehavior : MonoBehaviour
     private bool isMoving = false;
     public string ActivePowerUp { get; private set; } = "None";
 
+    // New Input System
+    private PlayerControls controls;
+    private Vector2 moveInput;
+    private float turnInput;
+    private bool isCharging;
+
     #endregion
 
     #region Méthodes Unity
-    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+
+    private void OnEnable()
     {
-        ResetStats(); // Réinitialise les stats du tank après le chargement de la scène
+        controls = new PlayerControls();
+
+        // Assignation des actions
+        controls.Player.Move.performed += ctx => moveInput = ctx.ReadValue<Vector2>();
+        controls.Player.Move.canceled += ctx => moveInput = Vector2.zero;
+
+        controls.Player.Shoot.performed += ctx => StartCharge();
+        controls.Player.Shoot.canceled += ctx => ShootWithPower();
+
+        controls.Player.Drop.performed += ctx => DropBomb();
+
+        controls.Enable();
     }
 
+    private void OnDisable()
+    {
+        controls.Disable();
+    }
 
     private void Awake()
     {
@@ -82,18 +104,41 @@ public class TankBehavior : MonoBehaviour
     private void Update()
     {
         UpdateEngineSound(rb.velocity.magnitude);
+
+        if (isCharging)
+        {
+            Charge();
+        }
+    }
+
+    private void FixedUpdate()
+    {
+        // Get input from the new Input System
+        Vector2 moveInput = controls.Player.Move.ReadValue<Vector2>();
+
+        // Use Y axis for Move and X axis for Turn
+        Move(new Vector3(0, 0, moveInput.y));
+        Turn(moveInput.x);
     }
 
     #endregion
 
     #region Mouvement et rotation
 
-    public void Move(Vector3 dir)
+    public void Move(Vector3 direction)
     {
-        dir.Normalize();
-        float currentSpeed = Mathf.Lerp(speed, speed * 0.75f, shootHoldTime / maxShootPower);
-        Vector3 movement = dir * currentSpeed * Time.fixedDeltaTime;
-        rb.MovePosition(rb.position + transform.TransformDirection(movement));
+        float currentSpeed = GetCurrentSpeed();
+        transform.Translate(direction * currentSpeed * Time.deltaTime);
+    }
+
+    private float GetCurrentSpeed()
+    {
+        if (isCharging)
+        {
+            float chargePercentage = Mathf.Clamp01(shootHoldTime / chargeTimeToMax);
+            return Mathf.Lerp(baseSpeed, baseSpeed * 0.1f, chargePercentage); // Réduction de la vitesse à 10% au maximum
+        }
+        return baseSpeed;
     }
 
     public void Turn(float dir)
@@ -110,22 +155,24 @@ public class TankBehavior : MonoBehaviour
     public void StartCharge()
     {
         shootHoldTime = 0f;
+        isCharging = true;
     }
 
     public void Charge()
     {
-        if (ammo > 0)
+        if (ammo > 0 && isCharging)
         {
-            shootHoldTime += Time.deltaTime / 2f * maxShootPower;
-            shootHoldTime = Mathf.Clamp(shootHoldTime, 0, maxShootPower);
+            shootHoldTime += Time.deltaTime;
+            shootHoldTime = Mathf.Clamp(shootHoldTime, 0, chargeTimeToMax);
         }
     }
 
     public void ShootWithPower()
     {
-        if (ammo > 0)
+        if (ammo > 0 && isCharging)
         {
-            float shootPower = Mathf.Clamp(shootHoldTime, 500f, maxShootPower);
+            // Calcule la puissance proportionnelle au temps de charge
+            float shootPower = Mathf.Lerp(500f, maxShootPower, shootHoldTime / chargeTimeToMax);
 
             // Instanciation du projectile
             Projectile projectile = Instantiate(ammoPrefab, canonPos.position, canonPos.rotation).GetComponent<Projectile>();
@@ -135,6 +182,7 @@ public class TankBehavior : MonoBehaviour
 
             ammo--;
             shootHoldTime = 0;
+            isCharging = false;
 
             PlaySound(shootSound);
             PlayParticle(shootEffect, canonPos.position);
@@ -211,7 +259,7 @@ public class TankBehavior : MonoBehaviour
         switch (powerUpType)
         {
             case PowerUpType.SpeedBoost:
-                speed *= 2;
+                baseSpeed *= 2;
                 break;
             case PowerUpType.Invincibility:
                 break;
@@ -227,7 +275,7 @@ public class TankBehavior : MonoBehaviour
         switch (powerUpType)
         {
             case PowerUpType.SpeedBoost:
-                speed /= 2;
+                baseSpeed /= 2;
                 break;
         }
     }
@@ -289,6 +337,7 @@ public class TankBehavior : MonoBehaviour
     }
 
     #endregion
+
 }
 
 public enum EPlayer

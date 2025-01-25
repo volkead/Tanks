@@ -80,15 +80,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 400112, guid: 002e2a607f5b64c48be0b3b0d8b8bfdd, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -4.51
+      value: 7.1376476
       objectReference: {fileID: 0}
     - target: {fileID: 400112, guid: 002e2a607f5b64c48be0b3b0d8b8bfdd, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.5
+      value: 0.026168365
       objectReference: {fileID: 0}
     - target: {fileID: 400112, guid: 002e2a607f5b64c48be0b3b0d8b8bfdd, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 12.69
+      value: 12.855595
       objectReference: {fileID: 0}
     - target: {fileID: 400112, guid: 002e2a607f5b64c48be0b3b0d8b8bfdd, type: 3}
       propertyPath: m_LocalRotation.w
@@ -140,6 +140,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 100112, guid: 002e2a607f5b64c48be0b3b0d8b8bfdd, type: 3}
       insertIndex: -1
       addedObject: {fileID: 6024172323004914034}
+    - targetCorrespondingSourceObject: {fileID: 100112, guid: 002e2a607f5b64c48be0b3b0d8b8bfdd, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 5614260900726824221}
   m_SourcePrefab: {fileID: 100100000, guid: 002e2a607f5b64c48be0b3b0d8b8bfdd, type: 3}
 --- !u!4 &7484783861572016580 stripped
 Transform:
@@ -220,9 +223,20 @@ MonoBehaviour:
   canonPos: {fileID: 3471959564313395701}
   minePrefab: {fileID: 7272504625920922894, guid: bcc15748855c75441a5ffd855469944a, type: 3}
   minePos: {fileID: 3154155630811270805}
-  speed: 1
-  angularSpeed: 20
+  baseSpeed: 5
+  angularSpeed: 180
   maxShootPower: 3000
+  chargeTimeToMax: 3
+  engineIdleSound: {fileID: 8300000, guid: 4932ab25b84dd7649b80af68a9660ddc, type: 3}
+  engineDrivingSound: {fileID: 8300000, guid: d7ca9fb5aa30155449192b23d7fb3336, type: 3}
+  shootSound: {fileID: 8300000, guid: 672a9941361ad494a99fba36759eca80, type: 3}
+  bombDropSound: {fileID: 8300000, guid: 581a15b75bdab4e4e855c9a87b0d0aaf, type: 3}
+  damageSound: {fileID: 8300000, guid: 84478d9e4a9fc704699d68dc6479b3ee, type: 3}
+  deathSound: {fileID: 8300000, guid: 5c27182a28a7eb942a362e6d198fe0e6, type: 3}
+  shootEffect: {fileID: 8916908749715170831, guid: 9e8fbbdbe7487924fb7c07a7087dfc20, type: 3}
+  bombEffect: {fileID: 8916908749715170831, guid: 9b36c7948438463469d1fb33b246f6eb, type: 3}
+  damageEffect: {fileID: 8916908749715170831, guid: 9e8fbbdbe7487924fb7c07a7087dfc20, type: 3}
+  deathEffect: {fileID: 8916908749715170831, guid: 5862a32d170362b408fb5c762155047d, type: 3}
 --- !u!82 &6024172323004914034
 AudioSource:
   m_ObjectHideFlags: 0
@@ -319,3 +333,45 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &5614260900726824221
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7484783861572043812}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 62899f850307741f2a39c98a8b639597, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Actions: {fileID: -944628639613478452, guid: 77feae4b9d10e7d4b97ed9f4067e7b2b, type: 3}
+  m_NotificationBehavior: 2
+  m_UIInputModule: {fileID: 0}
+  m_DeviceLostEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  m_DeviceRegainedEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  m_ControlsChangedEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  m_ActionEvents:
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 50e5de50-f090-4e45-963b-d1d9ad051445
+    m_ActionName: Player/Move[/XInputControllerWindows/leftStick,/Keyboard/w,/Keyboard/s,/Keyboard/a,/Keyboard/d]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 5a1bd418-6b5d-4884-9007-a333d3d75ba7
+    m_ActionName: Player/Shoot[/XInputControllerWindows/buttonSouth,/Keyboard/space]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 031a5c33-eeec-41b5-9c9b-9e60a2726240
+    m_ActionName: Player/Drop[/XInputControllerWindows/buttonEast,/Keyboard/ctrl]
+  m_NeverAutoSwitchControlSchemes: 0
+  m_DefaultControlScheme: 
+  m_DefaultActionMap: Player
+  m_SplitScreenIndex: -1
+  m_Camera: {fileID: 0}

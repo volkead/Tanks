@@ -1,53 +1,57 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class PlayerManager : MonoBehaviour
 {
-    [Range(2, 4)]
-    public int nbPlayer; // Nombre de joueurs
-    [SerializeField] GameObject tankPrefab; // Prefab de tank
+    private List<PlayerInput> players = new List<PlayerInput>();
 
-    private List<EPlayer> activePlayerIDs = new List<EPlayer>(); // Liste des IDs déjà attribués
+    [SerializeField]
+    private List<Transform> startingPoints;
 
-    private void Start()
+    private PlayerInputManager playerInputManager;
+
+    private void Awake()
     {
-        DontDestroyOnLoad(this);
-    }
+        playerInputManager = FindObjectOfType<PlayerInputManager>();
 
-    public void InstantiatePlayers()
-    {
-        for (int i = 0; i < nbPlayer; i++)
+        if (playerInputManager == null)
         {
-            // Vérifie si un playerID est déjà actif
-            EPlayer playerID = (EPlayer)i;
-            if (activePlayerIDs.Contains(playerID))
-            {
-                Debug.LogWarning($"Un tank avec le PlayerID {playerID} existe déjà. Ignoré.");
-                continue;
-            }
-
-            // Instancie un nouveau tank et configure son playerID
-            GameObject tank = Instantiate(tankPrefab);
-            TankBehavior tankBehavior = tank.GetComponent<TankBehavior>();
-
-            if (tankBehavior != null)
-            {
-                tankBehavior.playerID = playerID;
-                activePlayerIDs.Add(playerID); // Ajoute le playerID à la liste des IDs actifs
-            }
-            else
-            {
-                Debug.LogError("Le prefab du tank n'a pas de script TankBehavior !");
-            }
-
-            // Empêche la destruction du tank lors du changement de scène
-            DontDestroyOnLoad(tank);
+            Debug.LogError("PlayerInputManager not found in the scene!");
         }
     }
 
-    public void ResetActivePlayers()
+    private void OnEnable()
     {
-        activePlayerIDs.Clear(); // Réinitialise la liste des IDs actifs
+        // Subscribe to the PlayerInputManager's event
+        playerInputManager.onPlayerJoined += AddPlayer;
     }
+
+    private void OnDisable()
+    {
+        // Unsubscribe from the PlayerInputManager's event
+        playerInputManager.onPlayerJoined -= AddPlayer;
+    }
+
+    private void AddPlayer(PlayerInput player)
+    {
+        if (player.devices.Count == 0)
+        {
+            Debug.LogError("Player does not have any devices assigned!");
+            return;
+        }
+
+        players.Add(player);
+
+        InputDevice assignedDevice = player.devices[0];
+        Debug.Log($"Player {players.Count} assigned device: {assignedDevice.displayName}");
+
+        foreach (var device in player.devices)
+        {
+            Debug.Log($"Device assigned: {device.displayName}");
+        }
+
+        player.SwitchCurrentControlScheme(player.currentControlScheme, assignedDevice);
+    }
+
 }

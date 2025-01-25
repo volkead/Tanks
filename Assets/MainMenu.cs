@@ -23,7 +23,7 @@ public class MainMenu : MonoBehaviour
     public void UpdateUI()
     {
         nbTankText.text = tankSlider.value.ToString();
-        playerManager.nbPlayer = (int)tankSlider.value;
+       // playerManager.nbPlayer = (int)tankSlider.value;
     }
 
     public void LoadLevel()
